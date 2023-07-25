@@ -1,12 +1,18 @@
 const express = require("express");
-const path = require("path");
+// const path = require("path");
 const db = require("./db/db.json");
 const uuid = require("./helpers/uuid");
 const router = express.Router();
 const fs = require("fs");
 
 router.get("/notes", (req, res) => {
-  return res.json(db);
+    fs.readFile('./db/db.json', "utf-8", (err, data) => {
+        if(err){
+            res.send(err)
+            return
+        }
+        res.json(JSON.parse(data));
+    })
 });
 router.post("/notes", (req, res) => {
   const { title, text } = req.body;
@@ -18,8 +24,7 @@ router.post("/notes", (req, res) => {
       note_id: uuid(),
     };
     // const noteString = JSON.stringify(note);
-
-    fs.readFile(db, "utf-8", (err, data) => {
+    fs.readFile('./db/db.json', "utf-8", (err, data) => {
       if (err) {
         res.send(err);
         return
@@ -28,15 +33,19 @@ router.post("/notes", (req, res) => {
         newData.push(note);
         console.log(newData);
         const stringData = JSON.stringify(newData, null, "\t");
-      fs.writeFile(db, stringData, (err) =>
+      fs.writeFile('./db/db.json', stringData, (err) =>
         err
           ? console.error(err)
-          : console.log(
-              `Review for ${note.title} has been written to JSON file`
-            )
+          : res.json(note)
       );
     });
   }
 });
+// router.delete("/notes/:id", (req, res)=>{
+//     const { note_id } = req.body;
+//     if(){
+        
+//     }
+// })
 
 module.exports = router;
